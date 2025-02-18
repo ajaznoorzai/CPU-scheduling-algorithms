@@ -5,22 +5,28 @@ import java.util.LinkedList;
  * Feedback Round Robin Scheduler
  * 
  * @version 2017
+ *  This Java class implements a Feedback Round Robin (FB-RR) Scheduler,
+ which is a type of multilevel feedback queue scheduling algorithm. 
+ It uses multiple priority levels and moves processes between levels based on their execution behavior.
+
  */
+
 public class FeedbackRRScheduler extends AbstractScheduler {
 
   // TODO
-  private Queue<Process> readyQueue; // priority queues for each level
-  private int timeQuantum;
+  private Queue<Process> readyQueue; // priority queues for each level  //readyQueue: Stores processes in a FIFO (First-In, First-Out) order.
+  private int timeQuantum;           // timeQuantum: The time slice each process gets before preemption. 
+  
 
-  public static final int HIGHEST_PRIORITY = 0;
-  public static final int LOWEST_PRIORITY = 1000;
+  public static final int HIGHEST_PRIORITY = 0; //most important 
+  public static final int LOWEST_PRIORITY = 1000; // the least important priority
 
 
   @Override
   public void initialize(Properties parameters) {
-    // Initialize the priority queues for each level
-    readyQueue = new LinkedList<>();
-    timeQuantum = Integer.parseInt(parameters.getProperty("timeQuantum"));
+    // Initialise the priority queues for each level
+    readyQueue = new LinkedList<>();     // Initializes the readyQueue as a LinkedList (FIFO queue)
+    timeQuantum = Integer.parseInt(parameters.getProperty("timeQuantum"));   //Sets timeQuantum from the provided parameters
   }
 
   /**
@@ -32,10 +38,12 @@ public class FeedbackRRScheduler extends AbstractScheduler {
 
     // TODO
     if (usedFullTimeQuantum) {
-      process.setPriority(process.getPriority()+1);
-      readyQueue.add(process);
+      process.setPriority(process.getPriority()+1); // Decrease priority (increase value)
+      readyQueue.add(process); // Add to queue with new priority
     }else{
-      readyQueue.offer(process);
+      readyQueue.offer(process); // Add process normally
+      //If a process uses its full time quantum, it gets a lower priority (higher number).
+      //Otherwise, it remains at its current priority level.
 
     }
 
@@ -70,8 +78,11 @@ public class FeedbackRRScheduler extends AbstractScheduler {
         }
       }
     }
-    // if no process can be found in any priority level, return null
-    return null;
+    // Iterates through priority levels from highest (0) to lowest (1000).
+    //Picks the first available process in the queue.
+    //Removes it from the queue and returns it.
+    //If no process is found, returns null.
+    //return null;
   }
 
 
@@ -82,6 +93,7 @@ public class FeedbackRRScheduler extends AbstractScheduler {
 
   public int getTimeQuantum() {
     return timeQuantum;
+    //Returns the time slice assigned to each process.
   }
 
   /**
@@ -92,7 +104,11 @@ public class FeedbackRRScheduler extends AbstractScheduler {
   public boolean isPreemptive() {
     return true;
   }
-
-
-
 }
+
+//Processes enter at the highest priority (0).
+//Each process gets a fixed timeQuantum.
+//If a process completes within its quantum, it remains at its priority.
+//If a process uses its entire quantum without finishing, it moves to a lower priority level (priority value increases).
+//Lower-priority processes execute only if no higher-priority processes are available.
+//Starvation is avoided since all processes eventually get CPU time.
